@@ -10,7 +10,8 @@ const app = express()
 
 app.use(bodyParser.json())
 
-app.post('/todos', function postTodosCB(req, res) {
+app.route('/todos')
+	.post(function postTodosCB(req, res) {
 	const todo = new Todo({
 		text: req.body.text,
 	})
@@ -22,7 +23,16 @@ app.post('/todos', function postTodosCB(req, res) {
 		.catch((error) => {
 			res.status(400).send(error)
 		})
-})
+	})
+	.get(function getTodosCB(req, res) {
+		Todo.find()
+			.then((todos) => {
+				res.send({ todos })
+			})
+			.catch((error) => {
+				res.status(400).send(error)
+			})
+	})
 
 
 app.listen(3000, function appListenCB() {
