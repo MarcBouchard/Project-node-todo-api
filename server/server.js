@@ -5,6 +5,7 @@ const bodyParser = require('body-parser')
 const { mongoose } = require('./db/mongoose')
 const Todo = require('./models/todo')
 const User = require('./models/user')
+const authenticate = require('./middleware/authenticate')
 const {
 	pretty,
 	log,
@@ -12,6 +13,7 @@ const {
 	isBoolean,
 	idIsValid,
 } = require('../utils')
+
 
 const app = express()
 const port = process.env.PORT
@@ -123,5 +125,12 @@ app.route('/users')
 app.listen(port, function appListenCB() {
 	log(`Started up at port ${port}`)
 })
+
+app.route('/users/me')
+	.get(authenticate, function getUsersMeCB(req, res) {
+		res.send(req.user)
+	})
+
+
 
 module.exports = app
