@@ -1,12 +1,17 @@
 require('./config')
-const _ = require('lodash')
 const express = require('express')
 const bodyParser = require('body-parser')
 
 const { mongoose } = require('./db/mongoose')
 const Todo = require('./models/todo')
 const User = require('./models/user')
-const { pretty, log, idIsValid } = require('../utils')
+const {
+	pretty,
+	log,
+	pick,
+	isBoolean,
+	idIsValid,
+} = require('../utils')
 
 const app = express()
 const port = process.env.PORT
@@ -75,12 +80,12 @@ app.route('/todos/:id')
 	.patch(function patchTodosIdCB(req, res) {
 		const { id } = req.params
 
-		const body = _.pick(req.body, ['text', 'completed'])
+		const body = pick(req.body, ['text', 'completed'])
 
 		if (!idIsValid(id))
 			return res.status(400).send()
 
-		if (_.isBoolean(body.completed) && body.completed) {
+		if (isBoolean(body.completed) && body.completed) {
 			body.completedAt = new Date().getTime()
 		} else {
 			body.completed = false

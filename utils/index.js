@@ -1,3 +1,5 @@
+const { pick, isBoolean } = require('lodash')
+
 const { log } = console
 const { ObjectID } = require('mongodb')
 
@@ -13,6 +15,10 @@ module.exports = {
 	},
 	pretty: function prettyMethod(value) {
 		log(JSON.stringify(value, undefined, 2))
-	}
-
+	},
+	getIdString: function getIdString(instance) {
+		return instance._id.toHexString()
+	},
+	pick,
+	isBoolean,
 }
