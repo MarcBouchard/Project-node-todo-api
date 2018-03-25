@@ -104,6 +104,22 @@ app.route('/todos/:id')
 			})
 	})
 
+app.route('/users')
+	.post(function postUsersRouteCB(req, res) {
+		const body = pick(req.body, ['email', 'password'])
+		const user = new User(body)
+
+		user.save()
+			.then(() => {
+				return user.generateAuthToken()
+			})
+			.then((token) => {
+				res.header('x-auth', token).send(user)
+			})
+			.catch((error) => {
+				res.status(400).send()
+			})
+	})
 app.listen(port, function appListenCB() {
 	log(`Started up at port ${port}`)
 })
