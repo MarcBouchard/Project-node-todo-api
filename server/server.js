@@ -8,6 +8,7 @@ const User = require('./models/user')
 const { pretty, log } = require('../utils')
 
 const app = express()
+const port = process.env.PORT || 3000
 
 app.use(bodyParser.json())
 
@@ -54,8 +55,8 @@ app.route('/todos/:id')
 			})
 	})
 
-app.listen(3000, function appListenCB() {
-	console.log('Server is listening on port 3000')
+app.listen(port, function appListenCB() {
+	console.log(`Started up at port ${port}}`)
 })
 
 module.exports = app
