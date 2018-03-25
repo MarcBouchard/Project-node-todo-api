@@ -5,6 +5,9 @@ module.exports = {
 	newID: function newIDMethod() {
 		return new ObjectID()
 	},
+	idIsValid: function idIsValidMethod(id) {
+		return ObjectID.isValid(id)
+	},
 	log: function logMethod(value) {
 		log(value)
 	},
