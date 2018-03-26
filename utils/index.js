@@ -19,6 +19,9 @@ module.exports = {
 	getIdString: function getIdString(instance) {
 		return instance._id.toHexString()
 	},
+	pickEmailPassword: function pickEmailPasswordMethod(obj) {
+		return pick(obj, ['email', 'password'])
+	},
 	pick,
 	isBoolean,
 }

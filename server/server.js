@@ -10,6 +10,7 @@ const {
 	pretty,
 	log,
 	pick,
+	pickEmailPassword,
 	isBoolean,
 	idIsValid,
 } = require('../utils')
@@ -108,7 +109,7 @@ app.route('/todos/:id')
 
 app.route('/users')
 	.post(function postUsersRouteCB(req, res) {
-		const body = pick(req.body, ['email', 'password'])
+		const body = pickEmailPassword(req.body)
 		const user = new User(body)
 
 		user.save()
