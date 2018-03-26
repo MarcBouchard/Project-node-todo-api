@@ -121,7 +121,7 @@ describe('TODOS', () => {
 
 					Todo.findById(hexId)
 						.then((todo) => {
-							expect(todo).toBeNull()
+							expect(todo).toBeFalsy()
 							done()
 						})
 						.catch(error => done(error))
@@ -164,7 +164,7 @@ describe('TODOS', () => {
 				.expect((res) => {
 					expect(res.body.todo.text).toBe(text)
 					expect(res.body.todo.completed).toBe(true)
-					expect(Number.isInteger(res.body.todo.completedAt)).toBe(true)
+					expect(typeof res.body.todo.completedAt).toBe('number')
 				})
 				.end(done)
 		})
@@ -183,7 +183,7 @@ describe('TODOS', () => {
 				.expect((res) => {
 					expect(res.body.todo.text).toBe(text)
 					expect(res.body.todo.completed).toBe(false)
-					expect(res.body.todo.completedAt).toBeNull()
+					expect(res.body.todo.completedAt).toBeFalsy()
 				})
 				.end(done)
 
@@ -211,7 +211,7 @@ describe('USERS', () => {
 				.get('/users/me')
 				.expect(401)
 				.expect((res) => {
-					expect(res.body).toMatchObject({})
+					expect(res.body).toEqual({})
 				})
 				.end(done)
 		})
@@ -237,10 +237,11 @@ describe('USERS', () => {
 
 					User.findOne({ email })
 						.then((user) => {
-							expect(user).toBeDefined()
+							expect(user).toBeTruthy()
 							expect(user.password).not.toBe(password)
 							done()
 						})
+						.catch((error) => done(error))
 				})
 				
 		})
@@ -269,5 +270,60 @@ describe('USERS', () => {
 
 		})
 	})
+
+	describe('POST /users/login', () => {
+		it('should login user and return auth token', (done) => {
+			request(app)
+				.post('/users/login')
+				.send({
+					email: users[1].email,
+					password: users[1].password,
+				})
+				.expect(200)
+				.expect((res) => {
+					expect(res.headers['x-auth']).toBeTruthy()
+				})
+				.end((error, res) => {
+					if (error)
+						return done(error)
+					
+					User.findById(users[1]._id)
+						.then((user) => {
+							expect(user.toObject().tokens[0]).toMatchObject({
+								access: 'auth',
+								token: res.headers['x-auth']
+							})
+							done()
+						})
+						.catch((error) => done(error))
+						
+				})
+		})
+
+		it('should reject invalid login', (done) => {
+			request(app)
+				.post('/users/login')
+				.send({
+					email: users[1].email,
+					password: users[1].password + 1,
+				})
+				.expect(400)
+				.expect((res) => {
+					expect(res.headers['x-auth']).toBeFalsy()
+				})
+				.end((error, res) => {
+					if (error)
+						return done(error)
+					
+					User.findById(users[1]._id)
+						.then((user) => {
+							expect(user.toObject().tokens.length).toBe(0)
+							done()
+						})
+						.catch((error) => done(error))
+						
+				})
+		})
+ })
 
 })

@@ -138,7 +138,7 @@ app.post('/users/login', function getUsersLoginCB(req, res) {
 	User.findByCredentials(body.email, body.password)
 		.then((user) => {
 			return user.generateAuthToken()
-				.then((user) => {
+				.then((token) => {
 					res.header('x-auth', token).send(user)
 				})
 		})
