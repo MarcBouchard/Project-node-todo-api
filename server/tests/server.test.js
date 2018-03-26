@@ -276,8 +276,8 @@ describe('USERS', () => {
 			request(app)
 				.post('/users/login')
 				.send({
-					email: users[1].email,
-					password: users[1].password,
+					email: userTwo.email,
+					password: userTwo.password,
 				})
 				.expect(200)
 				.expect((res) => {
@@ -287,7 +287,7 @@ describe('USERS', () => {
 					if (error)
 						return done(error)
 					
-					User.findById(users[1]._id)
+					User.findById(userTwo._id)
 						.then((user) => {
 							expect(user.toObject().tokens[0]).toMatchObject({
 								access: 'auth',
@@ -304,8 +304,8 @@ describe('USERS', () => {
 			request(app)
 				.post('/users/login')
 				.send({
-					email: users[1].email,
-					password: users[1].password + 1,
+					email: userTwo.email,
+					password: userTwo.password + 1,
 				})
 				.expect(400)
 				.expect((res) => {
@@ -315,7 +315,7 @@ describe('USERS', () => {
 					if (error)
 						return done(error)
 					
-					User.findById(users[1]._id)
+					User.findById(userTwo._id)
 						.then((user) => {
 							expect(user.toObject().tokens.length).toBe(0)
 							done()
