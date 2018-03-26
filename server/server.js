@@ -148,6 +148,17 @@ app.post('/users/login', function getUsersLoginCB(req, res) {
 
 })
 
-
+app.delete(
+'/users/me/token',
+	authenticate,
+	function deleteUsersMeTokenCB(req, res) {
+		req.user.removeToken(req.token)
+			.then(() => {
+				res.status(200).send()
+			})
+			.catch((error) => {
+				res.satus(400).send()
+			})
+})
 
 module.exports = app
