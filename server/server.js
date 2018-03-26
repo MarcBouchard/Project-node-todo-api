@@ -132,6 +132,22 @@ app.route('/users/me')
 		res.send(req.user)
 	})
 
+app.post('/users/login', function getUsersLoginCB(req, res) {
+	const body = pickEmailPassword(req.body)
+
+	User.findByCredentials(body.email, body.password)
+		.then((user) => {
+			return user.generateAuthToken()
+				.then((user) => {
+					res.header('x-auth', token).send(user)
+				})
+		})
+		.catch((error) => {
+			res.status(400).send()
+		})
+
+})
+
 
 
 module.exports = app
