@@ -25,6 +25,7 @@ describe('TODOS', () => {
 
 			request(app)
 				.post('/todos')
+				.set('x-auth', userOne.tokens[0].token)
 				.send({text})
 				.expect(200)
 				.expect((res) => {
@@ -48,6 +49,7 @@ describe('TODOS', () => {
 		it('should not create todo with invalid body data', (done) => {
 			request(app)
 				.post('/todos')
+				.set('x-auth', userOne.tokens[0].token)
 				.send({})
 				.expect(400)
 				.end((error, res) => {
@@ -68,9 +70,10 @@ describe('TODOS', () => {
 		it('should get all todos', (done) => {
 			request(app)
 				.get('/todos')
+				.set('x-auth', userOne.tokens[0].token)
 				.expect(200)
 				.expect((res) => {
-					expect(res.body.todos.length).toBe(2)
+					expect(res.body.todos.length).toBe(1)
 				})
 				.end(done)
 		})
@@ -80,10 +83,19 @@ describe('TODOS', () => {
 		it('should return todo doc', (done) => {
 			request(app)
 				.get(`/todos/${todos[0]._id.toHexString()}`)
+				.set('x-auth', userOne.tokens[0].token)
 				.expect(200)
 				.expect((res) => {
 					expect(res.body.todo.text).toBe(todos[0].text)
 				})
+				.end(done)
+		})
+
+		it('should not return todo doc created by other user', (done) => {
+			request(app)
+				.get(`/todos/${todos[1]._id.toHexString()}`)
+				.set('x-auth', userOne.tokens[0].token)
+				.expect(404)
 				.end(done)
 		})
 
@@ -92,6 +104,7 @@ describe('TODOS', () => {
 
 			request(app)
 				.get(`/todos/${hexId}`)
+				.set('x-auth', userOne.tokens[0].token)
 				.expect(404)
 				.end(done)
 		})
@@ -99,6 +112,7 @@ describe('TODOS', () => {
 		it('should return 400 for non-object ids', (done) => {
 			request(app)
 				.get('/todos/123abc')
+				.set('x-auth', userOne.tokens[0].token)
 				.expect(400)
 				.end(done)
 
@@ -111,6 +125,7 @@ describe('TODOS', () => {
 
 			request(app)
 				.delete(`/todos/${hexId}`)
+				.set('x-auth', userTwo.tokens[0].token)
 				.expect(200)
 				.expect((res) => {
 					expect(res.body.todo._id).toBe(hexId)
@@ -128,11 +143,32 @@ describe('TODOS', () => {
 				})
 		})
 
+		it('should remove a todo', (done) => {
+			const hexId = todos[0]._id.toHexString()
+
+			request(app)
+				.delete(`/todos/${hexId}`)
+				.set('x-auth', userTwo.tokens[0].token)
+				.expect(404)
+				.end((error, res) => {
+					if (error)
+						return done(error)
+
+					Todo.findById(hexId)
+						.then((todo) => {
+							expect(todo).toBeTruthy()
+							done()
+						})
+						.catch(error => done(error))
+				})
+		})
+
 		it('should return 404 if todo not found', (done) => {
 			const hexId = newID().toHexString()
 
 			request(app)
 				.delete(`/todos/${hexId}`)
+				.set('x-auth', userTwo.tokens[0].token)
 				.expect(404)
 				.end(done)
 
@@ -143,6 +179,7 @@ describe('TODOS', () => {
 
 			request(app)
 				.delete('/todos/123')
+				.set('x-auth', userTwo.tokens[0].token)
 				.expect(400)
 				.end(done)
 
@@ -156,6 +193,7 @@ describe('TODOS', () => {
 
 			request(app)
 				.patch(`/todos/${hexId}`)
+				.set('x-auth', userOne.tokens[0].token)
 				.send({
 					completed: true,
 					text,
@@ -169,12 +207,28 @@ describe('TODOS', () => {
 				.end(done)
 		})
 
+		it('should not update the todo created by other user', (done) => {
+			const hexId = todos[0]._id.toHexString()	
+			const text = 'This should be the new text'
+
+			request(app)
+				.patch(`/todos/${hexId}`)
+				.set('x-auth', userTwo.tokens[0].token)
+				.send({
+					completed: true,
+					text,
+				})
+				.expect(404)
+				.end(done)
+		})
+
 		it('should clear completedAt when todo is not completed', (done) => {
 			const hexId = todos[1]._id.toHexString()	
 			const text = 'This should be the new text!!'
 
 			request(app)
 				.patch(`/todos/${hexId}`)
+				.set('x-auth', userTwo.tokens[0].token)
 				.send({
 					completed: false,
 					text,
@@ -289,7 +343,7 @@ describe('USERS', () => {
 					
 					User.findById(userTwo._id)
 						.then((user) => {
-							expect(user.toObject().tokens[0]).toMatchObject({
+							expect(user.toObject().tokens[1]).toMatchObject({
 								access: 'auth',
 								token: res.headers['x-auth']
 							})
@@ -317,7 +371,7 @@ describe('USERS', () => {
 					
 					User.findById(userTwo._id)
 						.then((user) => {
-							expect(user.toObject().tokens.length).toBe(0)
+							expect(user.toObject().tokens.length).toBe(1)
 							done()
 						})
 						.catch((error) => done(error))

@@ -17,6 +17,10 @@ const UserSchema = new Schema({
 		type: Number,
 		default: null,
 	},
+	_creator: {
+		type: Schema.Types.ObjectId,
+		required: true,
+	}
 })
 
 

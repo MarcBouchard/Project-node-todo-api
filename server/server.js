@@ -22,9 +22,10 @@ const port = process.env.PORT
 app.use(bodyParser.json())
 
 app.route('/todos')
-	.post(function postTodosCB(req, res) {
+	.post(authenticate, function postTodosCB(req, res) {
 	const todo = new Todo({
 		text: req.body.text,
+		_creator: req.user._id,
 	})
 
 	todo.save()
@@ -35,8 +36,10 @@ app.route('/todos')
 			res.status(400).send(error)
 		})
 	})
-	.get(function getTodosCB(req, res) {
-		Todo.find()
+	.get(authenticate, function getTodosCB(req, res) {
+		Todo.find({
+			_creator: req.user._id,
+		})
 			.then((todos) => {
 				res.send({ todos })
 			})
@@ -46,13 +49,16 @@ app.route('/todos')
 	})
 
 app.route('/todos/:id')
-	.get(function getTodosIdCB(req, res) {
+	.get(authenticate, function getTodosIdCB(req, res) {
 		const { id } = req.params
 
 		if (!idIsValid(id))
 			return res.status(400).send('User Id not valid.')
 
-		Todo.findById(id)
+		Todo.findOne({
+			_id: id,
+			_creator: req.user._id,
+		})
 			.then((todo) => {
 				if (!todo)
 					return res.status(404).send()
@@ -63,13 +69,16 @@ app.route('/todos/:id')
 				res.status(400).send()
 			})
 	})
-	.delete(function deleteTodosIdCB(req, res) {
+	.delete(authenticate, function deleteTodosIdCB(req, res) {
 		const { id } = req.params
 
 		if (!idIsValid(id))
 			return res.status(400).send()
 
-		Todo.findByIdAndRemove(id)
+		Todo.findOneAndRemove({
+			_id: id,
+			_creator: req.user._id,
+		})
 			.then((todo) => {
 				if (!todo)
 					return res.status(404).send()
@@ -80,7 +89,7 @@ app.route('/todos/:id')
 				res.status(400).send()
 			})
 	})
-	.patch(function patchTodosIdCB(req, res) {
+	.patch(authenticate, function patchTodosIdCB(req, res) {
 		const { id } = req.params
 
 		const body = pick(req.body, ['text', 'completed'])
@@ -95,7 +104,10 @@ app.route('/todos/:id')
 			body.completedAt = null
 		}
 
-		Todo.findByIdAndUpdate(id, { $set: body }, { new: true })	
+		Todo.findOneAndUpdate(
+			{ _id: id, _creator: req.user._id},
+			{ $set: body }, { new: true },
+		)	
 			.then((todo) => {
 				if (!todo)
 					return res.status(404).send()
