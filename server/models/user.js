@@ -49,7 +49,7 @@ UserSchema.methods.generateAuthToken = function generateAuthTokenCB() {
 
 	const token = jwt.sign(
 		{ _id: getIdString(user) },
-		'abc123',
+		process.env.JWT_SECRET,
 	).toString()
 
 	user.tokens.push({ access, token })
@@ -76,7 +76,7 @@ UserSchema.statics.findByToken = function findByTokenStatics(token) {
 	let decoded
 
 	try {
-		decoded = jwt.verify(token, 'abc123')
+		decoded = jwt.verify(token, process.env.JWT_SECRET)
 	} catch (error) {
 		return Promise.reject()
 	}
