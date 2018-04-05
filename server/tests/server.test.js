@@ -54,7 +54,7 @@ describe('TODOS', () => {
 				.expect(400)
 				.end((error, res) => {
 					if (error)
-						return done(error)	
+						return done(error)
 
 					Todo.find()
 						.then((todos) => {
@@ -188,7 +188,7 @@ describe('TODOS', () => {
 
 	describe('PATCH /todos/:id', () => {
 		it('should update the todo', (done) => {
-			const hexId = todos[0]._id.toHexString()	
+			const hexId = todos[0]._id.toHexString()
 			const text = 'This should be the new text'
 
 			request(app)
@@ -208,7 +208,7 @@ describe('TODOS', () => {
 		})
 
 		it('should not update the todo created by other user', (done) => {
-			const hexId = todos[0]._id.toHexString()	
+			const hexId = todos[0]._id.toHexString()
 			const text = 'This should be the new text'
 
 			request(app)
@@ -223,7 +223,7 @@ describe('TODOS', () => {
 		})
 
 		it('should clear completedAt when todo is not completed', (done) => {
-			const hexId = todos[1]._id.toHexString()	
+			const hexId = todos[1]._id.toHexString()
 			const text = 'This should be the new text!!'
 
 			request(app)
@@ -297,7 +297,7 @@ describe('USERS', () => {
 						})
 						.catch((error) => done(error))
 				})
-				
+
 		})
 
 		it('should return validation errors if request invalid', (done) => {
@@ -340,7 +340,7 @@ describe('USERS', () => {
 				.end((error, res) => {
 					if (error)
 						return done(error)
-					
+
 					User.findById(userTwo._id)
 						.then((user) => {
 							expect(user.toObject().tokens[1]).toMatchObject({
@@ -350,7 +350,7 @@ describe('USERS', () => {
 							done()
 						})
 						.catch((error) => done(error))
-						
+
 				})
 		})
 
@@ -368,14 +368,14 @@ describe('USERS', () => {
 				.end((error, res) => {
 					if (error)
 						return done(error)
-					
+
 					User.findById(userTwo._id)
 						.then((user) => {
 							expect(user.toObject().tokens.length).toBe(1)
 							done()
 						})
 						.catch((error) => done(error))
-						
+
 				})
 		})
  })
