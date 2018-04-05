@@ -132,31 +132,7 @@ app.route('/users/me')
 
 app.post('/users/login', postUsersLoginCB)
 
-	User.findByCredentials(body.email, body.password)
-		.then((user) => {
-			return user.generateAuthToken()
-				.then((token) => {
-					res.header('x-auth', token).send(user)
-				})
-		})
-		.catch((error) => {
-			res.status(400).send()
-		})
-
-})
-
-app.delete(
-'/users/me/token',
-	authenticate,
-	function deleteUsersMeTokenCB(req, res) {
-		req.user.removeToken(req.token)
-			.then(() => {
-				res.status(200).send()
-			})
-			.catch((error) => {
-				res.satus(400).send()
-			})
-})
+app.delete('/users/me/token', authenticate, deleteUsersMeTokenCB)
 
 module.exports = app
 
@@ -191,4 +167,14 @@ async function postUsersRouteCB(req, res) {
 		res.status(400).send()
 	}
 
+}
+
+//-- /USERS/ME/TOKEN -------------------------------------------------
+async function deleteUsersMeTokenCB(req, res) {
+	try {
+		await req.user.removeToken(req.token)
+		res.status(200).send()
+	} catch (error) {
+		res.satus(400).send()
+	}
 }
