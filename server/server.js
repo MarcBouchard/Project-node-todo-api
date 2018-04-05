@@ -22,18 +22,8 @@ const port = process.env.PORT
 app.use(bodyParser.json())
 
 app.route('/todos')
+	.get(authenticate, getTodosCB)
 	.post(authenticate, postTodosCB)
-	.get(authenticate, function getTodosCB(req, res) {
-		Todo.find({
-			_creator: req.user._id,
-		})
-			.then((todos) => {
-				res.send({ todos })
-			})
-			.catch((error) => {
-				res.status(400).send(error)
-			})
-	})
 
 app.route('/todos/:id')
 	.get(authenticate, function getTodosIdCB(req, res) {
@@ -128,6 +118,16 @@ module.exports = app
 // *******************************************************************
 //-- ROUTE HANDLERS --------------------------------------------------
 //---------------------------------------------------------- /todos --
+async function getTodosCB(req, res) {
+	try {
+		const todos = await Todo.find({ _creator: req.user._id })
+		res.send({ todos })
+	} catch (error) {
+		res.status(400).send(error)
+	}
+
+}
+
 async function postTodosCB(req, res) {
 	const todo = new Todo({
 		text: req.body.text,
