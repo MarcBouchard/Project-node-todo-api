@@ -27,26 +27,7 @@ app.route('/todos')
 
 app.route('/todos/:id')
 	.get(authenticate, getTodosIdCB)
-	.delete(authenticate, function deleteTodosIdCB(req, res) {
-		const { id } = req.params
-
-		if (!idIsValid(id))
-			return res.status(400).send()
-
-		Todo.findOneAndRemove({
-			_id: id,
-			_creator: req.user._id,
-		})
-			.then((todo) => {
-				if (!todo)
-					return res.status(404).send()
-
-				res.send({ todo })
-			})
-			.catch(() => {
-				res.status(400).send()
-			})
-	})
+	.delete(authenticate, deleteTodosIdCB)
 	.patch(authenticate, function patchTodosIdCB(req, res) {
 		const { id } = req.params
 
@@ -145,6 +126,27 @@ async function getTodosIdCB(req, res) {
 		res.status(400).send()
 	}
 
+}
+
+async function deleteTodosIdCB(req, res) {
+	const { id } = req.params
+
+	if (!idIsValid(id))
+		return res.status(400).send()
+
+	try {
+		const todo = await Todo.findOneAndRemove({
+			_id: id,
+			_creator: req.user._id,
+		})
+
+		if (!todo)
+			return res.status(404).send()
+
+		res.send({ todo })
+	} catch (error) {
+		res.status(400).send()
+	}
 }
 
 //-- /USERS/LOGIN ----------------------------------------------------
