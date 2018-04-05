@@ -26,26 +26,7 @@ app.route('/todos')
 	.post(authenticate, postTodosCB)
 
 app.route('/todos/:id')
-	.get(authenticate, function getTodosIdCB(req, res) {
-		const { id } = req.params
-
-		if (!idIsValid(id))
-			return res.status(400).send('User Id not valid.')
-
-		Todo.findOne({
-			_id: id,
-			_creator: req.user._id,
-		})
-			.then((todo) => {
-				if (!todo)
-					return res.status(404).send()
-
-				res.send({ todo })
-			})
-			.catch((error) => {
-				res.status(400).send()
-			})
-	})
+	.get(authenticate, getTodosIdCB)
 	.delete(authenticate, function deleteTodosIdCB(req, res) {
 		const { id } = req.params
 
@@ -142,6 +123,29 @@ async function postTodosCB(req, res) {
 	}
 }
 
+
+//------------------------------------------------------ /todos/:id --
+async function getTodosIdCB(req, res) {
+	const { id } = req.params
+
+	if (!idIsValid(id))
+		return res.status(400).send('User Id not valid.')
+
+	try {
+		const todo = await Todo.findOne({
+			_id: id,
+			_creator: req.user._id,
+		})
+
+		if (!todo)
+			return res.status(404).send()
+
+		res.send({ todo })
+	} catch (error) {
+		res.status(400).send()
+	}
+
+}
 
 //-- /USERS/LOGIN ----------------------------------------------------
 async function postUsersLoginCB(req, res) {
