@@ -19,8 +19,11 @@ const {
 const app = express()
 const port = process.env.PORT
 
+//------------------------------------------------------ Middleware --
 app.use(bodyParser.json())
 
+
+//---------------------------------------------------- Todos Routes --
 app.route('/todos')
 	.get(authenticate, getTodosCB)
 	.post(authenticate, postTodosCB)
@@ -30,6 +33,8 @@ app.route('/todos/:id')
 	.delete(authenticate, deleteTodosIdCB)
 	.patch(authenticate, patchTodosIdCB)
 
+
+//---------------------------------------------------- Users Routes --
 app.post('/users', postUsersRouteCB)
 
 app.get('/users/me', authenticate, getUsersMeCB)
@@ -40,12 +45,14 @@ app.delete('/users/me/token', authenticate, deleteUsersMeTokenCB)
 
 app.listen(port, appListenCB)
 
+
+//-------------------------------------------------- Module Exports --
 module.exports = app
 
 
 
 // *******************************************************************
-//-- ROUTE HANDLERS --------------------------------------------------
+//-- TODOS ROUTE HANDLERS --------------------------------------------
 //---------------------------------------------------------- /todos --
 async function getTodosCB(req, res) {
 	try {
@@ -70,7 +77,6 @@ async function postTodosCB(req, res) {
 		res.status(400).send(error)
 	}
 }
-
 
 //------------------------------------------------------ /todos/:id --
 async function getTodosIdCB(req, res) {
@@ -146,21 +152,9 @@ async function deleteTodosIdCB(req, res) {
 	}
 }
 
-//-- /USERS/LOGIN ----------------------------------------------------
-async function postUsersLoginCB(req, res) {
-	try {
-		const body = pickEmailPassword(req.body)
-		const user = await User.findByCredentials(body.email, body.password)
-		const token = await user.generateAuthToken()
-		res.header('x-auth', token).send(user)
-	} catch (error) {
-		res.status(400).send()
-	}
 
-}
-
-
-//-- /USERS ----------------------------------------------------------
+//-- USERS ROUTE HANDLERS --------------------------------------------
+//---------------------------------------------------------- /users --
 async function postUsersRouteCB(req, res) {
 	try {
 		const body = pickEmailPassword(req.body)
@@ -176,12 +170,23 @@ async function postUsersRouteCB(req, res) {
 
 }
 
-
 //------------------------------------------------------- /users/me --
 function getUsersMeCB(req, res) {
 		res.send(req.user)
 }
 
+//---------------------------------------------------- /users/login --
+async function postUsersLoginCB(req, res) {
+	try {
+		const body = pickEmailPassword(req.body)
+		const user = await User.findByCredentials(body.email, body.password)
+		const token = await user.generateAuthToken()
+		res.header('x-auth', token).send(user)
+	} catch (error) {
+		res.status(400).send()
+	}
+
+}
 
 //------------------------------------------------- /users/me/token --
 async function deleteUsersMeTokenCB(req, res) {
