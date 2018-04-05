@@ -107,7 +107,7 @@ app.route('/todos/:id')
 		Todo.findOneAndUpdate(
 			{ _id: id, _creator: req.user._id},
 			{ $set: body }, { new: true },
-		)	
+		)
 			.then((todo) => {
 				if (!todo)
 					return res.status(404).send()
@@ -119,22 +119,8 @@ app.route('/todos/:id')
 			})
 	})
 
-app.route('/users')
-	.post(function postUsersRouteCB(req, res) {
-		const body = pickEmailPassword(req.body)
-		const user = new User(body)
+app.post('/users', postUsersRouteCB)
 
-		user.save()
-			.then(() => {
-				return user.generateAuthToken()
-			})
-			.then((token) => {
-				res.header('x-auth', token).send(user)
-			})
-			.catch((error) => {
-				res.status(400).send()
-			})
-	})
 app.listen(port, function appListenCB() {
 	log(`Started up at port ${port}`)
 })
@@ -174,3 +160,22 @@ app.delete(
 })
 
 module.exports = app
+
+
+
+// *******************************************************************
+//-- /USERS ----------------------------------------------------------
+async function postUsersRouteCB(req, res) {
+	try {
+		const body = pickEmailPassword(req.body)
+		const user = new User(body)
+
+		await user.save()
+		const token = await user.generateAuthToken()
+		res.header('x-auth', token).send(user)
+
+	} catch (error) {
+		res.status(400).send()
+	}
+
+}
