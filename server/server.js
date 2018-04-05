@@ -36,10 +36,7 @@ app.listen(port, function appListenCB() {
 	log(`Started up at port ${port}`)
 })
 
-app.route('/users/me')
-	.get(authenticate, function getUsersMeCB(req, res) {
-		res.send(req.user)
-	})
+app.get('/users/me', authenticate, getUsersMeCB)
 
 app.post('/users/login', postUsersLoginCB)
 
@@ -182,7 +179,13 @@ async function postUsersRouteCB(req, res) {
 }
 
 
-//-- /USERS/ME/TOKEN -------------------------------------------------
+//------------------------------------------------------- /users/me --
+function getUsersMeCB(req, res) {
+		res.send(req.user)
+}
+
+
+//------------------------------------------------- /users/me/token --
 async function deleteUsersMeTokenCB(req, res) {
 	try {
 		await req.user.removeToken(req.token)
