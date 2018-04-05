@@ -130,8 +130,7 @@ app.route('/users/me')
 		res.send(req.user)
 	})
 
-app.post('/users/login', function getUsersLoginCB(req, res) {
-	const body = pickEmailPassword(req.body)
+app.post('/users/login', postUsersLoginCB)
 
 	User.findByCredentials(body.email, body.password)
 		.then((user) => {
@@ -164,6 +163,20 @@ module.exports = app
 
 
 // *******************************************************************
+//-- /USERS/LOGIN ----------------------------------------------------
+async function postUsersLoginCB(req, res) {
+	try {
+		const body = pickEmailPassword(req.body)
+		const user = await User.findByCredentials(body.email, body.password)
+		const token = await user.generateAuthToken()
+		res.header('x-auth', token).send(user)
+	} catch (error) {
+		res.status(400).send()
+	}
+
+}
+
+
 //-- /USERS ----------------------------------------------------------
 async function postUsersRouteCB(req, res) {
 	try {
