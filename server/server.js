@@ -28,35 +28,7 @@ app.route('/todos')
 app.route('/todos/:id')
 	.get(authenticate, getTodosIdCB)
 	.delete(authenticate, deleteTodosIdCB)
-	.patch(authenticate, function patchTodosIdCB(req, res) {
-		const { id } = req.params
-
-		const body = pick(req.body, ['text', 'completed'])
-
-		if (!idIsValid(id))
-			return res.status(400).send()
-
-		if (isBoolean(body.completed) && body.completed) {
-			body.completedAt = new Date().getTime()
-		} else {
-			body.completed = false
-			body.completedAt = null
-		}
-
-		Todo.findOneAndUpdate(
-			{ _id: id, _creator: req.user._id},
-			{ $set: body }, { new: true },
-		)
-			.then((todo) => {
-				if (!todo)
-					return res.status(404).send()
-
-				res.send({ todo })
-			})
-			.catch((error) => {
-				res.status(400).send()
-			})
-	})
+	.patch(authenticate, patchTodosIdCB)
 
 app.post('/users', postUsersRouteCB)
 
@@ -117,6 +89,36 @@ async function getTodosIdCB(req, res) {
 			_id: id,
 			_creator: req.user._id,
 		})
+
+		if (!todo)
+			return res.status(404).send()
+
+		res.send({ todo })
+	} catch (error) {
+		res.status(400).send()
+	}
+
+}
+
+async function patchTodosIdCB(req, res) {
+	const { id } = req.params
+	const body = pick(req.body, ['text', 'completed'])
+
+	if (!idIsValid(id))
+		return res.status(400).send()
+
+	if (isBoolean(body.completed) && body.completed) {
+		body.completedAt = new Date().getTime()
+	} else {
+		body.completed = false
+		body.completedAt = null
+	}
+
+	try {
+		const todo = await Todo.findOneAndUpdate(
+			{ _id: id, _creator: req.user._id},
+			{ $set: body }, { new: true },
+		)
 
 		if (!todo)
 			return res.status(404).send()
