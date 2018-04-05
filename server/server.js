@@ -32,15 +32,13 @@ app.route('/todos/:id')
 
 app.post('/users', postUsersRouteCB)
 
-app.listen(port, function appListenCB() {
-	log(`Started up at port ${port}`)
-})
-
 app.get('/users/me', authenticate, getUsersMeCB)
 
 app.post('/users/login', postUsersLoginCB)
 
 app.delete('/users/me/token', authenticate, deleteUsersMeTokenCB)
+
+app.listen(port, appListenCB)
 
 module.exports = app
 
@@ -194,3 +192,10 @@ async function deleteUsersMeTokenCB(req, res) {
 		res.satus(400).send()
 	}
 }
+
+
+//-- APP LISTENER ----------------------------------------------------
+function appListenCB() {
+	log(`Started up at port ${port}`)
+}
+
